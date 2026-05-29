@@ -1,0 +1,273 @@
+======================================================
+  GUIA DE CONFIGURACAO - Bolao Copa do Mundo 2026
+======================================================
+Siga este guia do inicio ao fim. Sao cerca de 40 minutos.
+======================================================
+
+
+======================================================
+PASSO 1 - Instalar o Node.js (programa necessario)
+======================================================
+
+1. Abra seu navegador e acesse: nodejs.org
+2. Clique no botao verde grande "LTS" (versao estavel)
+3. Baixe e instale o arquivo .msi
+4. Clique em "Next" em todas as telas do instalador
+5. REINICIE O COMPUTADOR apos instalar
+
+
+======================================================
+PASSO 2 - Criar conta no Supabase (banco de dados gratuito)
+======================================================
+
+O Supabase e onde ficam guardados todos os dados do bolao
+(usuarios, palpites, pontuacoes, etc.)
+
+1. Abra: supabase.com
+2. Clique em "Start your project"
+3. Crie uma conta com seu e-mail ou Google
+4. Clique em "New Project"
+5. Preencha:
+   - Name: bolao-copa-2026
+   - Database Password: crie uma senha forte e ANOTE ela
+   - Region: escolha "South America (Sao Paulo)"
+6. Clique em "Create new project"
+7. Aguarde (pode demorar 2 minutos ate ficar pronto)
+
+
+======================================================
+PASSO 3 - Configurar o banco de dados
+======================================================
+
+1. No painel do Supabase, clique em "SQL Editor" no menu esquerdo
+   (icone que parece uma folha de codigo)
+2. Clique em "New query"
+3. Abra a pasta "supabase" dentro da pasta do projeto
+4. Abra o arquivo "schema.sql" com o Bloco de Notas
+   (botao direito > Abrir com > Bloco de Notas)
+5. Selecione TODO o conteudo (Ctrl+A) e copie (Ctrl+C)
+6. Cole no SQL Editor do Supabase (Ctrl+V)
+7. Clique no botao verde "Run"
+8. Aguarde a mensagem de sucesso
+
+
+======================================================
+PASSO 4 - Criar os Buckets de Armazenamento (fotos)
+======================================================
+
+Os buckets guardam as fotos de perfil e logos das empresas.
+
+1. No Supabase, clique em "Storage" no menu esquerdo
+2. Clique em "New bucket"
+   - Name: avatars
+   - Marque a opcao "Public bucket"
+   - Clique em Create bucket
+3. Clique em "New bucket" novamente
+   - Name: logos
+   - Marque a opcao "Public bucket"
+   - Clique em Create bucket
+
+4. Agora, ainda no SQL Editor, copie e execute o texto abaixo
+   para dar permissao de acesso aos buckets:
+
+--- COPIE A PARTIR DAQUI ---
+CREATE POLICY "Avatar public select" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Avatar auth insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "Avatar auth update" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "Logo public select" ON storage.objects FOR SELECT USING (bucket_id = 'logos');
+CREATE POLICY "Logo auth insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'logos' AND auth.role() = 'authenticated');
+CREATE POLICY "Logo auth update" ON storage.objects FOR UPDATE USING (bucket_id = 'logos' AND auth.role() = 'authenticated');
+--- ATE AQUI ---
+
+
+======================================================
+PASSO 5 - Obter as credenciais do Supabase
+======================================================
+
+1. No Supabase, clique em "Project Settings" (icone de engrenagem)
+2. Clique em "API"
+3. Voce precisara de dois valores. ANOTE-OS:
+   - Project URL (comeca com https://)
+   - anon public key (texto muito longo)
+
+
+======================================================
+PASSO 6 - Configurar o arquivo de credenciais
+======================================================
+
+1. Abra a pasta "bolao-copa-2026" no Explorer
+2. Ative a exibicao de arquivos ocultos:
+   - No Explorer: Ver > Mostrar > Itens ocultos (marque)
+3. Procure o arquivo ".env.local.example"
+4. Clique com o botao direito nele > Copiar
+5. Cole na mesma pasta (Ctrl+V)
+6. Renomeie a copia para: .env.local
+   (atencao: o nome comeca com ponto e nao tem extensao .txt)
+7. Clique com o botao direito em ".env.local" > Abrir com > Bloco de Notas
+8. Substitua o conteudo pelas suas credenciais do Passo 5:
+
+   NEXT_PUBLIC_SUPABASE_URL=https://SEU_PROJETO_REAL.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anon_real_aqui
+
+9. Salve o arquivo (Ctrl+S)
+
+
+======================================================
+PASSO 7 - Instalar e rodar o projeto
+======================================================
+
+1. Abra a pasta "bolao-copa-2026" no Explorer
+2. Clique na barra de endereco do Explorer (onde mostra o caminho)
+3. Digite: powershell
+4. Pressione Enter (abre um terminal na pasta certa)
+5. No terminal, digite exatamente e pressione Enter:
+   npm install
+
+   Aguarde terminar (pode demorar 2-3 minutos)
+
+6. Depois de terminar, digite e pressione Enter:
+   npm run dev
+
+7. Abra o navegador e acesse:
+   http://localhost:3000
+
+8. O site do bolao vai aparecer!
+
+
+======================================================
+PASSO 8 - Criar sua conta de ADMINISTRADOR
+======================================================
+
+1. No site (http://localhost:3000), clique em "Criar conta"
+2. No campo "Codigo de Convite", digite EXATAMENTE:
+
+   ADMIN-BOLAO-2026
+
+3. Preencha seus dados (apelido, nome, idade, e-mail, senha)
+4. Clique em "Criar Conta e Jogar!"
+5. Voce sera redirecionado para o painel principal
+6. No menu superior, aparecera o botao "Admin" -- e so seu!
+
+
+======================================================
+PASSO 9 - Publicar na internet (para todos acessarem)
+======================================================
+
+=== 9.1 - Criar conta no GitHub ===
+
+1. Abra: github.com
+2. Clique em "Sign up" e crie uma conta gratuita
+3. Clique no "+" no canto superior direito > "New repository"
+4. Em Repository name, coloque: bolao-copa-2026
+5. Deixe como "Public"
+6. Clique em "Create repository"
+7. Na proxima tela, COPIE a URL que aparece (algo como:
+   https://github.com/SEU_USUARIO/bolao-copa-2026.git)
+
+=== 9.2 - Enviar o projeto para o GitHub ===
+
+No terminal da pasta do projeto (repita o passo de abrir o PowerShell),
+execute os comandos abaixo UM POR UM, pressionando Enter apos cada um:
+
+  git init
+  git add .
+  git commit -m "Bolao Copa 2026"
+  git branch -M main
+  git remote add origin COLE_AQUI_A_URL_DO_GITHUB
+  git push -u origin main
+
+(substitua COLE_AQUI_A_URL_DO_GITHUB pela URL copiada no passo 9.1)
+
+=== 9.3 - Deploy no Vercel ===
+
+1. Abra: vercel.com
+2. Clique em "Sign Up" e use sua conta do GitHub
+3. Clique em "Add New..." > "Project"
+4. Selecione o repositorio "bolao-copa-2026"
+5. Clique em "Deploy" (aguarde 1-2 minutos)
+6. Apos o deploy, clique em "Settings" > "Environment Variables"
+7. Adicione as duas variaveis (clique em "Add" para cada uma):
+   - Nome: NEXT_PUBLIC_SUPABASE_URL    Valor: (sua URL do Supabase)
+   - Nome: NEXT_PUBLIC_SUPABASE_ANON_KEY    Valor: (sua chave anon)
+8. Va em "Deployments" e clique em "Redeploy" no ultimo deploy
+9. Seu site estara no ar! O endereco sera algo como:
+   https://bolao-copa-2026.vercel.app
+
+
+======================================================
+PASSO 10 - Usar o sistema (guia rapido)
+======================================================
+
+=== Para criar uma empresa cliente ===
+
+1. Faca login com sua conta admin
+2. Clique em "Admin" no menu
+3. Clique em "Gerenciar Empresas"
+4. Clique em "Nova Empresa"
+5. Digite o nome da empresa, escolha o limite de usuarios,
+   faca upload da logo (opcional)
+6. Clique em "Criar Empresa"
+7. Um CODIGO DE CONVITE sera gerado automaticamente (ex: EMPRESAABC-X9F2)
+8. Copie esse codigo e envie para os funcionarios da empresa
+
+=== Para os funcionarios se cadastrarem ===
+
+1. Acessam o site do bolao
+2. Clicam em "Criar conta"
+3. Digitam o codigo de convite da empresa
+4. Preenchem os dados e pronto!
+
+=== Para cadastrar os jogos da Copa ===
+
+1. Clique em "Admin" > "Gerenciar Jogos"
+2. Clique em "Novo Jogo"
+3. Selecione os dois times, data, hora, fase e estadio
+4. Clique em "Cadastrar Jogo"
+
+=== Apos um jogo terminar ===
+
+1. Va em "Gerenciar Jogos"
+2. Encontre o jogo
+3. Insira o placar real (ex: 2 e 1)
+4. Clique em "Salvar Placar"
+5. Clique em "Calcular Pontos" -- os pontos sao distribuidos!
+
+=== Apos a Final (campeao) ===
+
+1. Va em "Gerenciar Jogos"
+2. No final da pagina, selecione o time campeao
+3. Os 25 pontos sao distribuidos automaticamente
+
+
+======================================================
+PONTUACAO DO BOLAO
+======================================================
+
+  Placar exato (ex: 2x1 e foi 2x1)  -->  10 pontos
+  Resultado certo (ex: Brasil ganhou) -->   5 pontos
+  Acertou o campeao                   -->  25 pontos
+
+
+======================================================
+PERGUNTAS FREQUENTES
+======================================================
+
+P: O codigo de convite pode ser reutilizado?
+R: Sim! Todos da empresa usam o mesmo codigo.
+
+P: Os funcionarios de empresas diferentes se veem no ranking?
+R: Nao. Cada empresa so ve o ranking interno dela.
+
+P: O palpite de campeao pode ser alterado?
+R: Sim, ate o primeiro jogo das quartas de final comecar.
+
+P: O que acontece se nao fizer palpite em um jogo?
+R: Zero pontos naquele jogo.
+
+P: Posso ter o mesmo e-mail em duas empresas?
+R: Nao. Cada e-mail = uma conta unica.
+
+
+======================================================
+Em caso de duvidas, abra o Claude Code e pergunte!
+======================================================
