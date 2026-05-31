@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,25 +7,29 @@
 body {
   background-color: #0D1117;
   color: #E6EDF3;
+  font-family: 'DM Sans', sans-serif;
 }
 
 @layer components {
   .card {
-    @apply bg-[#161B22] border border-[#30363D] rounded-xl p-4;
+    @apply bg-[#161d27] border border-white/[0.07] rounded-2xl p-4;
   }
   .btn-primary {
-    @apply bg-[#00D54B] hover:bg-green-400 text-black font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-[#22c55e] hover:bg-[#16a34a] text-black font-bold py-2.5 px-6 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply bg-[#30363D] hover:bg-[#3d444d] text-white font-medium py-2 px-4 rounded-lg transition-colors;
+    @apply bg-[#30363D] hover:bg-[#3d444d] text-white font-medium py-2.5 px-6 rounded-full transition-all duration-200;
   }
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-6 rounded-full transition-all duration-200;
   }
   .input {
-    @apply bg-[#0D1117] border border-[#30363D] text-white rounded-lg p-3 w-full focus:outline-none focus:border-[#00D54B] transition-colors placeholder:text-[#8B949E];
+    @apply bg-white/[0.05] border border-white/[0.1] text-white rounded-xl p-3.5 w-full focus:outline-none focus:border-[#22c55e] transition-colors placeholder:text-[#8B949E];
   }
   .label {
-    @apply text-[#8B949E] text-sm font-medium mb-1 block;
+    @apply text-[#8B949E] text-xs font-medium mb-1.5 block uppercase tracking-wide;
+  }
+  .font-title {
+    font-family: 'Syne', sans-serif;
   }
 }

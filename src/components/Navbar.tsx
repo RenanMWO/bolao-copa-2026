@@ -46,89 +46,105 @@ export default function Navbar() {
     links.push({ href: '/admin', label: 'Admin', icon: ShieldCheck })
   }
 
-  return (
-    <nav className="bg-[#161B22] border-b border-[#30363D] sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2">
-            {company?.logo_url ? (
-              <img src={company.logo_url} alt={company.name} className="h-8 w-auto object-contain" />
-            ) : (
-              <Trophy className="text-[#FFD700]" size={28} />
-            )}
-            <span className="font-bold text-white hidden sm:block">
-              {company?.name || 'Bolão Copa 2026'}
-            </span>
-          </Link>
+  const initials = profile?.nickname?.[0]?.toUpperCase() || '?'
 
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-1">
+  return (
+    <>
+      {/* Google Fonts */}
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');`}</style>
+
+      <nav style={{ fontFamily: "'DM Sans', sans-serif" }} className="bg-[#0d1117]/90 backdrop-blur-md border-b border-white/[0.06] sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+
+            {/* Logo */}
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              {company?.logo_url ? (
+                <img src={company.logo_url} alt={company.name} className="h-7 w-auto object-contain" />
+              ) : (
+                <Trophy className="text-[#f5c518]" size={22} />
+              )}
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '15px' }} className="text-white hidden sm:block">
+                {company?.name || 'Bolão Copa 2026'}
+              </span>
+            </Link>
+
+            {/* Desktop links */}
+            <div className="hidden md:flex items-center gap-0.5">
+              {links.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    pathname.startsWith(href)
+                      ? 'bg-white/[0.08] text-white'
+                      : 'text-[#8B949E] hover:text-white hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <Icon size={15} />
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Avatar + logout */}
+            <div className="hidden md:flex items-center gap-2.5">
+              <span className="text-[#8B949E] text-sm">{profile?.nickname}</span>
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt=""
+                  className="w-[34px] h-[34px] rounded-full object-cover border border-white/20"
+                />
+              ) : (
+                <div className="w-[34px] h-[34px] rounded-full bg-[#22c55e]/20 border border-[#22c55e]/30 flex items-center justify-center text-[#22c55e] text-xs font-bold">
+                  {initials}
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="text-[#8B949E] hover:text-red-400 transition-colors p-1 ml-1"
+                title="Sair"
+              >
+                <LogOut size={17} />
+              </button>
+            </div>
+
+            {/* Mobile hamburger */}
+            <button className="md:hidden text-[#8B949E] hover:text-white" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-white/[0.06] px-4 py-3 flex flex-col gap-1">
             {links.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   pathname.startsWith(href)
-                    ? 'bg-[#00D54B] text-black'
-                    : 'text-[#8B949E] hover:text-white hover:bg-[#30363D]'
+                    ? 'bg-white/[0.08] text-white'
+                    : 'text-[#8B949E] hover:text-white hover:bg-white/[0.05]'
                 }`}
               >
                 <Icon size={16} />
                 {label}
               </Link>
             ))}
-          </div>
-
-          {/* User info + logout */}
-          <div className="hidden md:flex items-center gap-3">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover border border-[#30363D]" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-[#30363D] flex items-center justify-center text-[#8B949E] text-xs font-bold">
-                {profile?.nickname?.[0]?.toUpperCase() || '?'}
-              </div>
-            )}
-            <span className="text-[#8B949E] text-sm">{profile?.nickname}</span>
-            <button onClick={handleLogout} className="text-[#8B949E] hover:text-red-400 transition-colors p-1" title="Sair">
-              <LogOut size={18} />
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-white/[0.05] transition-colors mt-1"
+            >
+              <LogOut size={16} />
+              Sair
             </button>
           </div>
-
-          {/* Mobile hamburger */}
-          <button className="md:hidden text-[#8B949E] hover:text-white" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden border-t border-[#30363D] px-4 py-3 flex flex-col gap-1">
-          {links.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMenuOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname.startsWith(href)
-                  ? 'bg-[#00D54B] text-black'
-                  : 'text-[#8B949E] hover:text-white hover:bg-[#30363D]'
-              }`}
-            >
-              <Icon size={16} />
-              {label}
-            </Link>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-[#30363D] transition-colors mt-2"
-          >
-            <LogOut size={16} />
-            Sair
-          </button>
-        </div>
-      )}
-    </nav>
+        )}
+      </nav>
+    </>
   )
 }
