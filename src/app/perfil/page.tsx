@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
-import { User, Upload, Save } from 'lucide-react'
+import { User, Upload } from 'lucide-react'
 
 export default function PerfilPage() {
   const supabase = createClient()
@@ -80,13 +80,14 @@ export default function PerfilPage() {
   }
 
   const preview = avatarPreview || avatarUrl
+  const initial = nickname?.[0]?.toUpperCase() || '?'
 
   if (loading) {
     return (
       <>
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00D54B]"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22c55e]"></div>
         </div>
       </>
     )
@@ -95,68 +96,169 @@ export default function PerfilPage() {
   return (
     <>
       <Navbar />
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <User className="text-[#00D54B]" size={28} />
-          <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>
+      <div className="max-w-md mx-auto px-4 py-8">
+
+        {/* Header */}
+        <div className="mb-6">
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '28px' }} className="text-white">
+            Meu Perfil
+          </h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px' }} className="text-[#8B949E] mt-1">
+            Edite suas informações e foto de perfil
+          </p>
         </div>
 
-        <div className="card">
-          <form onSubmit={handleSave} className="flex flex-col gap-5">
+        {/* Card do formulário */}
+        <div style={{
+          background: '#161d27',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '20px',
+          padding: '32px',
+        }}>
+          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
             {/* Avatar */}
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-24 h-24 rounded-full bg-[#30363D] flex items-center justify-center overflow-hidden border-2 border-[#00D54B]">
-                {preview ? (
-                  <img src={preview} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <User size={36} className="text-[#8B949E]" />
-                )}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: '96px',
+                  height: '96px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '3px solid #22c55e',
+                  boxShadow: '0 0 0 6px rgba(34,197,94,0.12)',
+                  background: 'rgba(34,197,94,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  {preview ? (
+                    <img src={preview} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '32px', color: '#22c55e' }}>
+                      {initial}
+                    </span>
+                  )}
+                </div>
               </div>
-              <label className="cursor-pointer flex items-center gap-2 text-[#00D54B] text-sm hover:underline">
+
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '13px',
+                color: '#22c55e',
+                cursor: 'pointer',
+              }}
+                className="hover:underline"
+              >
                 <Upload size={14} />
                 Alterar foto
-                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
               </label>
             </div>
 
+            {/* Apelido */}
             <div>
-              <label className="label">Apelido</label>
+              <label style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '11px',
+                fontWeight: 500,
+                color: '#8B949E',
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.06em',
+                display: 'block',
+                marginBottom: '6px',
+              }}>
+                Apelido
+              </label>
               <input
                 className="input"
                 value={nickname}
                 onChange={e => setNickname(e.target.value)}
+                placeholder="Como você quer ser chamado"
                 required
               />
             </div>
+
+            {/* Nome completo */}
             <div>
-              <label className="label">Nome Completo</label>
+              <label style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '11px',
+                fontWeight: 500,
+                color: '#8B949E',
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.06em',
+                display: 'block',
+                marginBottom: '6px',
+              }}>
+                Nome Completo
+              </label>
               <input
                 className="input"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
+                placeholder="Seu nome completo"
                 required
               />
             </div>
+
+            {/* Idade */}
             <div>
-              <label className="label">Idade</label>
+              <label style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '11px',
+                fontWeight: 500,
+                color: '#8B949E',
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.06em',
+                display: 'block',
+                marginBottom: '6px',
+              }}>
+                Idade
+              </label>
               <input
                 type="number"
                 className="input"
                 value={age}
                 onChange={e => setAge(e.target.value)}
+                placeholder="Sua idade"
                 min="1"
                 max="120"
               />
             </div>
 
+            {/* Mensagem */}
             {message && (
-              <p className={`text-sm text-center ${message.includes('Erro') ? 'text-red-400' : 'text-[#00D54B]'}`}>
+              <div style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '13px',
+                textAlign: 'center',
+                padding: '10px',
+                borderRadius: '10px',
+                background: message.includes('Erro') ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                border: `1px solid ${message.includes('Erro') ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}`,
+                color: message.includes('Erro') ? '#f87171' : '#22c55e',
+              }}>
                 {message}
-              </p>
+              </div>
             )}
 
-            <button type="submit" className="btn-primary flex items-center justify-center gap-2" disabled={saving}>
-              <Save size={16} />
+            {/* Botão */}
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn-primary"
+              style={{
+                width: '100%',
+                padding: '16px',
+                fontFamily: "'Syne', sans-serif",
+                fontSize: '15px',
+                fontWeight: 700,
+              }}
+            >
               {saving ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </form>
