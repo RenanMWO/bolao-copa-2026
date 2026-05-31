@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
-import { Plus, ArrowLeft, Calculator, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, ArrowLeft, Calculator, ChevronDown, ChevronUp, RotateCcw, Trash2 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { Match, Team } from '@/types'
@@ -125,6 +125,28 @@ export default function JogosPage() {
       setTimeout(() => setMessage(''), 3000)
     }
     setCalculating('')
+  }
+
+  async function resetMatch(matchId: string) {
+    if (!confirm('Resetar este jogo? O placar será apagado, os pontos dos palpites serão zerados e o jogo voltará para "Agendado".')) return
+    setSaving(true)
+    await supabase.from('matches').update({ status: 'scheduled', home_score: null, away_score: null }).eq('id', matchId)
+    await supabase.from('match_predictions').update({ points: null }).eq('match_id', matchId)
+    await fetchMatches()
+    setMessage('Jogo resetado com sucesso!')
+    setTimeout(() => setMessage(''), 3000)
+    setSaving(false)
+  }
+
+  async function deleteMatch(matchId: string) {
+    if (!confirm('Excluir este jogo? Esta ação não pode ser desfeita.')) return
+    setSaving(true)
+    await supabase.from('match_predictions').delete().eq('match_id', matchId)
+    await supabase.from('matches').delete().eq('id', matchId)
+    await fetchMatches()
+    setMessage('Jogo excluído com sucesso!')
+    setTimeout(() => setMessage(''), 3000)
+    setSaving(false)
   }
 
   async function calculateChampionPoints(teamId: string) {
@@ -314,6 +336,28 @@ export default function JogosPage() {
                                 >
                                   <Calculator size={12} />
                                   {calculating === match.id ? 'Calculando...' : 'Calcular Pontos'}
+                                </button>
+                              )}
+
+                              {match.status === 'finished' && (
+                                <button
+                                  onClick={() => resetMatch(match.id)}
+                                  disabled={saving}
+                                  className="flex items-center gap-1 text-xs py-1.5 px-3 rounded-lg bg-yellow-600/20 text-yellow-400 hover:bg-yellow-600/30 transition-colors border border-yellow-600/30"
+                                >
+                                  <RotateCcw size={12} />
+                                  Resetar
+                                </button>
+                              )}
+
+                              {match.status === 'scheduled' && (
+                                <button
+                                  onClick={() => deleteMatch(match.id)}
+                                  disabled={saving}
+                                  className="flex items-center gap-1 text-xs py-1.5 px-3 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 transition-colors border border-red-600/30"
+                                >
+                                  <Trash2 size={12} />
+                                  Excluir
                                 </button>
                               )}
                             </div>
