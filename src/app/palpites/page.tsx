@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
-import { Lock, CheckCircle, XCircle, Save } from 'lucide-react'
+import { Lock, CheckCircle, XCircle } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { Match, MatchPrediction } from '@/types'
@@ -17,6 +17,7 @@ export default function PalpitesPage() {
   const [predictions, setPredictions] = useState<Record<string, MatchPrediction>>({})
   const [inputs, setInputs] = useState<Record<string, { home: string; away: string }>>({})
   const [saving, setSaving] = useState<Record<string, boolean>>({})
+  const [saved, setSaved] = useState<Record<string, boolean>>({})
   const [messages, setMessages] = useState<Record<string, string>>({})
   const [activeStage, setActiveStage] = useState<string>('group')
   const [userId, setUserId] = useState<string>('')
@@ -49,7 +50,6 @@ export default function PalpitesPage() {
       setPredictions(predMap)
       setInputs(inputMap)
 
-      // Set active stage to first with matches
       const availableStages = STAGES.filter(s => matchList.some(m => m.stage === s))
       if (availableStages.length > 0) setActiveStage(availableStages[0])
 
@@ -64,10 +64,10 @@ export default function PalpitesPage() {
   }
 
   function getPointsColor(points: number | null | undefined) {
-    if (points === 10) return 'text-[#00D54B]'
-    if (points === 5) return 'text-yellow-400'
-    if (points === 0) return 'text-red-400'
-    return 'text-[#8B949E]'
+    if (points === 10) return '#22c55e'
+    if (points === 5) return '#f5c518'
+    if (points === 0) return '#f87171'
+    return '#8B949E'
   }
 
   async function savePrediction(match: Match) {
@@ -79,7 +79,6 @@ export default function PalpitesPage() {
 
     const predicted_home = parseInt(inp.home)
     const predicted_away = parseInt(inp.away)
-
     const existing = predictions[match.id]
     let error
 
@@ -99,12 +98,12 @@ export default function PalpitesPage() {
     if (error) {
       setMessages(m => ({ ...m, [match.id]: 'Erro ao salvar.' }))
     } else {
-      setMessages(m => ({ ...m, [match.id]: 'Salvo!' }))
+      setSaved(s => ({ ...s, [match.id]: true }))
       setPredictions(p => ({
         ...p,
         [match.id]: { ...(p[match.id] || {}), predicted_home, predicted_away } as MatchPrediction,
       }))
-      setTimeout(() => setMessages(m => ({ ...m, [match.id]: '' })), 2000)
+      setTimeout(() => setSaved(s => ({ ...s, [match.id]: false })), 600)
     }
     setSaving(s => ({ ...s, [match.id]: false }))
   }
@@ -117,7 +116,7 @@ export default function PalpitesPage() {
       <>
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#00D54B]"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22c55e]"></div>
         </div>
       </>
     )
@@ -125,12 +124,31 @@ export default function PalpitesPage() {
 
   return (
     <>
+      <style>{`
+        @keyframes flashGreen {
+          0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+          30%  { box-shadow: 0 0 0 6px rgba(34,197,94,0.25); }
+          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+        .flash-saved { animation: flashGreen 600ms ease-out; }
+
+        .score-input::-webkit-inner-spin-button,
+        .score-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .score-input { -moz-appearance: textfield; }
+      `}</style>
+
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Palpites</h1>
-        <p className="text-[#8B949E] mb-6">
-          Placar exato = 10pts | Resultado certo = 5pts | Travado quando o jogo começa
-        </p>
+
+        {/* Header */}
+        <div className="mb-6">
+          <h1 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '28px' }} className="text-white">
+            Palpites
+          </h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px' }} className="text-[#8B949E] mt-1">
+            Placar exato · 10pts &nbsp;·&nbsp; Resultado certo · 5pts &nbsp;·&nbsp; Trava quando o jogo começa
+          </p>
+        </div>
 
         {/* Stage tabs */}
         <div className="flex gap-2 flex-wrap mb-6">
@@ -138,11 +156,18 @@ export default function PalpitesPage() {
             <button
               key={stage}
               onClick={() => setActiveStage(stage)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                activeStage === stage
-                  ? 'bg-[#00D54B] text-black'
-                  : 'bg-[#30363D] text-[#8B949E] hover:text-white'
-              }`}
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '13px',
+                fontWeight: 500,
+                padding: '6px 16px',
+                borderRadius: '100px',
+                transition: 'all 0.2s',
+                background: activeStage === stage ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.04)',
+                border: activeStage === stage ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                color: activeStage === stage ? '#22c55e' : '#8B949E',
+                cursor: 'pointer',
+              }}
             >
               {STAGE_LABELS[stage]}
             </button>
@@ -150,7 +175,7 @@ export default function PalpitesPage() {
         </div>
 
         {filteredMatches.length === 0 ? (
-          <div className="card text-center text-[#8B949E] py-12">
+          <div className="card text-center text-[#8B949E] py-12" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             Nenhum jogo nesta fase ainda.
           </div>
         ) : (
@@ -159,82 +184,144 @@ export default function PalpitesPage() {
               const locked = isLocked(match)
               const pred = predictions[match.id]
               const inp = inputs[match.id] || { home: '', away: '' }
+              const hasPred = !!pred
+              const isSaved = saved[match.id]
 
               return (
-                <div key={match.id} className={`card ${locked ? 'opacity-90' : 'hover:border-[#00D54B]'} transition-colors`}>
-                  {/* Match header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[#8B949E] text-xs">
-                      {format(parseISO(match.match_date), "dd/MM/yyyy 'às' HH'h'mm", { locale: ptBR })}
-                      {match.venue ? ` • ${match.venue}` : ''}
+                <div
+                  key={match.id}
+                  className={`card ${isSaved ? 'flash-saved' : ''}`}
+                  style={{ padding: '20px 24px', opacity: locked && match.status !== 'finished' ? 0.75 : 1 }}
+                >
+                  {/* Header do card */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: '#8B949E' }}>
+                      {format(parseISO(match.match_date), "dd MMM · HH'h'mm", { locale: ptBR })}
+                      {match.venue ? ` · ${match.venue}` : ''}
                     </span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      {/* Badge fase */}
+                      <span style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: '11px',
+                        background: 'rgba(34,197,94,0.08)',
+                        border: '1px solid rgba(34,197,94,0.2)',
+                        borderRadius: '100px',
+                        padding: '2px 10px',
+                        color: '#22c55e',
+                      }}>
+                        {STAGE_LABELS[match.stage]}
+                      </span>
                       {match.status === 'finished' && (
-                        <span className="text-xs bg-[#30363D] text-[#8B949E] px-2 py-0.5 rounded">Encerrado</span>
+                        <span style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: '11px',
+                          background: 'rgba(255,255,255,0.05)',
+                          borderRadius: '100px',
+                          padding: '2px 10px',
+                          color: '#8B949E',
+                          border: '1px solid rgba(255,255,255,0.07)',
+                        }}>Encerrado</span>
                       )}
                       {match.status === 'live' && (
-                        <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded animate-pulse">Ao Vivo</span>
+                        <span style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: '11px',
+                          background: 'rgba(239,68,68,0.15)',
+                          borderRadius: '100px',
+                          padding: '2px 10px',
+                          color: '#f87171',
+                          border: '1px solid rgba(239,68,68,0.3)',
+                        }} className="animate-pulse">● Ao Vivo</span>
                       )}
-                      {locked && match.status === 'scheduled' && (
-                        <Lock size={14} className="text-[#8B949E]" />
-                      )}
+                      {locked && match.status === 'scheduled' && <Lock size={13} className="text-[#8B949E]" />}
                     </div>
                   </div>
 
-                  {/* Teams and score input */}
-                  <div className="flex items-center gap-3">
-                    {/* Home team */}
-                    <div className="flex-1 flex items-center gap-2 justify-end">
-                      <span className="text-white font-semibold text-sm text-right">{match.home_team?.name}</span>
+                  {/* Times + inputs */}
+                  <div className="flex items-center gap-4">
+                    {/* Time da casa */}
+                    <div className="flex-1 flex flex-col items-end gap-1.5">
                       {match.home_team?.flag_url && (
-                        <img src={match.home_team.flag_url} alt="" className="w-8 h-5 object-cover rounded-sm flex-shrink-0" />
+                        <img src={match.home_team.flag_url} alt="" style={{ width: '36px', height: '24px', objectFit: 'cover', borderRadius: '3px', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }} />
                       )}
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 600 }} className="text-white text-right">{match.home_team?.name}</span>
                     </div>
 
-                    {/* Score inputs */}
-                    <div className="flex items-center gap-2">
+                    {/* Inputs de placar */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <input
                         type="number"
-                        min="0"
-                        max="99"
+                        min="0" max="99"
                         disabled={locked}
                         value={inp.home}
                         onChange={e => setInputs(i => ({ ...i, [match.id]: { ...inp, home: e.target.value } }))}
-                        className="w-12 text-center text-white font-bold text-lg bg-[#0D1117] border border-[#30363D] rounded-lg p-2 disabled:opacity-50 focus:border-[#00D54B] outline-none"
+                        className="score-input"
+                        style={{
+                          width: '52px', height: '52px',
+                          textAlign: 'center',
+                          fontFamily: "'Syne', sans-serif",
+                          fontSize: '24px',
+                          fontWeight: 700,
+                          color: '#fff',
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '12px',
+                          outline: 'none',
+                          transition: 'border-color 0.2s',
+                          opacity: locked ? 0.5 : 1,
+                        }}
+                        onFocus={e => { if (!locked) e.target.style.borderColor = '#22c55e' }}
+                        onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)' }}
                       />
-                      <span className="text-[#8B949E] font-bold">×</span>
+                      <span style={{ color: '#8B949E', fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '18px' }}>×</span>
                       <input
                         type="number"
-                        min="0"
-                        max="99"
+                        min="0" max="99"
                         disabled={locked}
                         value={inp.away}
                         onChange={e => setInputs(i => ({ ...i, [match.id]: { ...inp, away: e.target.value } }))}
-                        className="w-12 text-center text-white font-bold text-lg bg-[#0D1117] border border-[#30363D] rounded-lg p-2 disabled:opacity-50 focus:border-[#00D54B] outline-none"
+                        className="score-input"
+                        style={{
+                          width: '52px', height: '52px',
+                          textAlign: 'center',
+                          fontFamily: "'Syne', sans-serif",
+                          fontSize: '24px',
+                          fontWeight: 700,
+                          color: '#fff',
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '12px',
+                          outline: 'none',
+                          transition: 'border-color 0.2s',
+                          opacity: locked ? 0.5 : 1,
+                        }}
+                        onFocus={e => { if (!locked) e.target.style.borderColor = '#22c55e' }}
+                        onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)' }}
                       />
                     </div>
 
-                    {/* Away team */}
-                    <div className="flex-1 flex items-center gap-2">
+                    {/* Time visitante */}
+                    <div className="flex-1 flex flex-col items-start gap-1.5">
                       {match.away_team?.flag_url && (
-                        <img src={match.away_team.flag_url} alt="" className="w-8 h-5 object-cover rounded-sm flex-shrink-0" />
+                        <img src={match.away_team.flag_url} alt="" style={{ width: '36px', height: '24px', objectFit: 'cover', borderRadius: '3px', boxShadow: '0 2px 6px rgba(0,0,0,0.4)' }} />
                       )}
-                      <span className="text-white font-semibold text-sm">{match.away_team?.name}</span>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 600 }} className="text-white">{match.away_team?.name}</span>
                     </div>
                   </div>
 
-                  {/* Result (if finished) */}
+                  {/* Resultado real + pontos */}
                   {match.status === 'finished' && match.home_score !== null && (
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-[#8B949E] text-xs">
+                    <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: '#8B949E' }}>
                         Resultado real: {match.home_score} × {match.away_score}
                       </span>
                       {pred && (
-                        <div className="flex items-center gap-1">
-                          {pred.points === 10 && <CheckCircle size={14} className="text-[#00D54B]" />}
-                          {pred.points === 5 && <CheckCircle size={14} className="text-yellow-400" />}
-                          {pred.points === 0 && <XCircle size={14} className="text-red-400" />}
-                          <span className={`text-sm font-bold ${getPointsColor(pred.points)}`}>
+                        <div className="flex items-center gap-1.5">
+                          {pred.points === 10 && <CheckCircle size={13} style={{ color: '#22c55e' }} />}
+                          {pred.points === 5 && <CheckCircle size={13} style={{ color: '#f5c518' }} />}
+                          {pred.points === 0 && <XCircle size={13} style={{ color: '#f87171' }} />}
+                          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '14px', color: getPointsColor(pred.points) }}>
                             {pred.points !== null ? `+${pred.points}pts` : '—'}
                           </span>
                         </div>
@@ -242,27 +329,42 @@ export default function PalpitesPage() {
                     </div>
                   )}
 
-                  {/* Save button */}
+                  {/* Footer: status do palpite + botão */}
                   {!locked && (
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-[#8B949E] text-xs">
-                        {pred ? 'Palpite salvo — pode alterar' : 'Sem palpite ainda'}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {messages[match.id] && (
-                          <span className={`text-xs ${messages[match.id] === 'Salvo!' ? 'text-[#00D54B]' : 'text-red-400'}`}>
-                            {messages[match.id]}
-                          </span>
-                        )}
-                        <button
-                          onClick={() => savePrediction(match)}
-                          disabled={saving[match.id] || inp.home === '' || inp.away === ''}
-                          className="btn-primary flex items-center gap-1 py-1.5 px-3 text-sm"
-                        >
-                          <Save size={14} />
-                          {saving[match.id] ? 'Salvando...' : 'Salvar'}
-                        </button>
-                      </div>
+                    <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      {hasPred ? (
+                        <span style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: '11px',
+                          background: 'rgba(34,197,94,0.08)',
+                          border: '1px solid rgba(34,197,94,0.2)',
+                          borderRadius: '100px',
+                          padding: '2px 10px',
+                          color: '#22c55e',
+                        }}>
+                          ✓ Palpite salvo
+                        </span>
+                      ) : (
+                        <span style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: '11px',
+                          background: 'rgba(245,197,24,0.08)',
+                          border: '1px solid rgba(245,197,24,0.2)',
+                          borderRadius: '100px',
+                          padding: '2px 10px',
+                          color: '#f5c518',
+                        }}>
+                          Palpite pendente
+                        </span>
+                      )}
+                      <button
+                        onClick={() => savePrediction(match)}
+                        disabled={saving[match.id] || inp.home === '' || inp.away === ''}
+                        className="btn-primary"
+                        style={{ fontSize: '13px', padding: '8px 18px' }}
+                      >
+                        {saving[match.id] ? 'Salvando...' : 'Salvar palpite'}
+                      </button>
                     </div>
                   )}
                 </div>
