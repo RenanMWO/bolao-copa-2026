@@ -232,7 +232,7 @@ export default function DashboardPage() {
                         {pred.matches?.home_team?.name} × {pred.matches?.away_team?.name}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        {pred.points === 10 && <CheckCircle size={13} className="text-[#22c55e]" />}
+                        {pred.points === 15 && <CheckCircle size={13} className="text-[#22c55e]" />}
                         {pred.points === 5 && <CheckCircle size={13} className="text-[#f5c518]" />}
                         {pred.points === 0 && <XCircle size={13} className="text-red-400" />}
                         <span

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
-import { Plus, ArrowLeft, Calculator, ChevronDown, ChevronUp, RotateCcw, Trash2 } from 'lucide-react'
+import { Plus, ArrowLeft, Calculator, ChevronDown, ChevronUp, RotateCcw, Trash2, Trophy } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { Match, Team } from '@/types'
@@ -24,6 +24,8 @@ export default function JogosPage() {
   const [calculating, setCalculating] = useState<string>('')
   const [message, setMessage] = useState('')
   const [expandedStage, setExpandedStage] = useState<string>('group')
+  const [selectedChampionId, setSelectedChampionId] = useState<string>('')
+  const [calculatingChampion, setCalculatingChampion] = useState(false)
 
   // Score editing state
   const [editScores, setEditScores] = useState<Record<string, { home: string; away: string }>>({})
@@ -149,14 +151,19 @@ export default function JogosPage() {
     setSaving(false)
   }
 
-  async function calculateChampionPoints(teamId: string) {
-    const { error } = await supabase.rpc('calculate_champion_points', { p_champion_team_id: teamId })
+  async function calculateChampionPoints() {
+    if (!selectedChampionId) return
+    const team = teams.find(t => t.id === selectedChampionId)
+    if (!confirm(`Calcular 25 pontos para quem apostou em "${team?.name}" como campeão? Esta ação vai sobrescrever pontos anteriores de campeão.`)) return
+    setCalculatingChampion(true)
+    const { error } = await supabase.rpc('calculate_champion_points', { p_champion_team_id: selectedChampionId })
     if (error) {
       setMessage(`Erro: ${error.message}`)
     } else {
-      setMessage('Pontos de campeão calculados!')
-      setTimeout(() => setMessage(''), 3000)
+      setMessage(`Pontos de campeão calculados para ${team?.name}!`)
+      setTimeout(() => setMessage(''), 4000)
     }
+    setCalculatingChampion(false)
   }
 
   const stagesWithMatches = STAGES.filter(s => matches.some(m => m.stage === s))
@@ -374,18 +381,51 @@ export default function JogosPage() {
 
         {/* Champion points section */}
         <div className="card mt-6">
-          <h3 className="text-white font-bold mb-3">Calcular Pontos do Campeão</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <Trophy size={18} className="text-[#FFD700]" />
+            <h3 className="text-white font-bold">Calcular Pontos do Campeão</h3>
+          </div>
           <p className="text-[#8B949E] text-sm mb-4">
-            Após a final, selecione o time campeão para calcular os 25 pontos de quem acertou.
+            Após a final, selecione o time campeão e clique em "Calcular Pontos" para distribuir os 25 pontos.
           </p>
-          <select
-            className="input mb-3"
-            onChange={e => e.target.value && calculateChampionPoints(e.target.value)}
-            defaultValue=""
-          >
-            <option value="">Selecionar campeão...</option>
-            {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+          <div className="flex items-center gap-3 flex-wrap">
+            <select
+              className="input flex-1"
+              style={{ minWidth: '200px' }}
+              value={selectedChampionId}
+              onChange={e => setSelectedChampionId(e.target.value)}
+            >
+              <option value="">Selecionar time campeão...</option>
+              {teams.map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.code})
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={calculateChampionPoints}
+              disabled={!selectedChampionId || calculatingChampion}
+              className="btn-primary flex items-center gap-2"
+              style={{ opacity: !selectedChampionId ? 0.5 : 1 }}
+            >
+              <Calculator size={15} />
+              {calculatingChampion ? 'Calculando...' : 'Calcular Pontos'}
+            </button>
+          </div>
+          {selectedChampionId && (
+            <div className="mt-3 flex items-center gap-2">
+              {(() => {
+                const team = teams.find(t => t.id === selectedChampionId)
+                return team ? (
+                  <>
+                    {team.flag_url && <img src={team.flag_url} alt="" style={{ width: '24px', height: '16px', objectFit: 'cover', borderRadius: '2px' }} />}
+                    <span className="text-[#E6EDF3] text-sm font-medium">{team.name}</span>
+                    <span className="text-[#8B949E] text-sm">selecionado como campeão</span>
+                  </>
+                ) : null
+              })()}
+            </div>
+          )}
         </div>
       </div>
     </>

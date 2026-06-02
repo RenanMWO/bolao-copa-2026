@@ -97,14 +97,22 @@ export default function RankingPage() {
           {/* Header da tabela */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '48px 1fr 64px 56px 56px 64px',
+            gridTemplateColumns: '48px 1fr 56px 52px 52px 72px',
             padding: '10px 20px',
             borderBottom: '1px solid rgba(255,255,255,0.05)',
             background: 'rgba(0,0,0,0.2)',
           }}>
-            {['#', 'Participante', 'Pts', 'Exatos', 'Result.', 'Palpites'].map((h, i) => (
+            {[
+              { label: '#',       title: '',                   mobile: true  },
+              { label: 'Participante', title: '',              mobile: true  },
+              { label: 'PTS',     title: 'Pontuação total',    mobile: true  },
+              { label: 'PE',      title: 'Placares exatos',    mobile: true  },
+              { label: 'RC',      title: 'Resultados certos',  mobile: false },
+              { label: 'CAMPEÃO', title: 'Acertou o campeão',  mobile: false },
+            ].map(({ label, title, mobile }, i) => (
               <span
-                key={h}
+                key={label}
+                title={title}
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: '11px',
@@ -112,12 +120,12 @@ export default function RankingPage() {
                   color: '#8B949E',
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
-                  textAlign: i >= 2 ? 'right' : 'left',
-                  display: i >= 4 ? 'none' : 'block',
+                  textAlign: i >= 2 ? 'center' : 'left',
+                  cursor: title ? 'help' : 'default',
                 }}
-                className={i >= 4 ? 'hidden sm:block' : ''}
+                className={!mobile ? 'hidden sm:block' : ''}
               >
-                {h}
+                {label}
               </span>
             ))}
           </div>
@@ -139,7 +147,7 @@ export default function RankingPage() {
                   style={{
                     animationDelay: `${idx * 80}ms`,
                     display: 'grid',
-                    gridTemplateColumns: '48px 1fr 64px 56px 56px 64px',
+                    gridTemplateColumns: '48px 1fr 56px 52px 52px 72px',
                     alignItems: 'center',
                     padding: '14px 20px',
                     borderBottom: '1px solid rgba(255,255,255,0.05)',
@@ -220,26 +228,44 @@ export default function RankingPage() {
                     </div>
                   </div>
 
-                  {/* Pontos */}
-                  <div style={{ textAlign: 'right' }}>
+                  {/* PTS */}
+                  <div style={{ textAlign: 'center' }}>
                     <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '16px', color: '#22c55e' }}>
                       {entry.total_points}
                     </span>
                   </div>
 
-                  {/* Exatos */}
-                  <div style={{ textAlign: 'right', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#E6EDF3' }}>
-                    {entry.exact_scores}
+                  {/* PE — Placar Exato */}
+                  <div style={{ textAlign: 'center' }}>
+                    <span style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      color: entry.exact_scores > 0 ? '#22c55e' : '#8B949E',
+                    }}>
+                      {entry.exact_scores}
+                    </span>
                   </div>
 
-                  {/* Resultados (hidden mobile) */}
-                  <div style={{ textAlign: 'right', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#E6EDF3' }} className="hidden sm:block">
-                    {entry.correct_results}
+                  {/* RC — Resultado Certo (hidden mobile) */}
+                  <div style={{ textAlign: 'center' }} className="hidden sm:block">
+                    <span style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      color: entry.correct_results > 0 ? '#f5c518' : '#8B949E',
+                    }}>
+                      {entry.correct_results}
+                    </span>
                   </div>
 
-                  {/* Palpites (hidden mobile) */}
-                  <div style={{ textAlign: 'right', fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#8B949E' }} className="hidden sm:block">
-                    {entry.total_predictions}
+                  {/* CAMPEÃO (hidden mobile) */}
+                  <div style={{ textAlign: 'center' }} className="hidden sm:block">
+                    {entry.champion_correct === 1 ? (
+                      <span style={{ fontSize: '18px' }} title="Acertou o campeão!">🏆</span>
+                    ) : (
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#8B949E' }}>—</span>
+                    )}
                   </div>
                 </div>
               )
@@ -250,7 +276,7 @@ export default function RankingPage() {
         {/* Legenda */}
         <div className="mt-4" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {[
-            { pts: '10pts', label: 'Placar exato', color: '#22c55e' },
+            { pts: '15pts', label: 'Placar exato', color: '#22c55e' },
             { pts: '5pts',  label: 'Resultado certo', color: '#f5c518' },
             { pts: '25pts', label: 'Campeão certo', color: '#f5c518' },
           ].map(({ pts, label, color }) => (

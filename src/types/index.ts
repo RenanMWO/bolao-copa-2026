@@ -79,6 +79,7 @@ export interface RankingEntry {
   total_points: number
   exact_scores: number
   correct_results: number
+  champion_correct: number
   total_predictions: number
   company_rank: number
 }

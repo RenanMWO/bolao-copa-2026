@@ -64,7 +64,7 @@ export default function PalpitesPage() {
   }
 
   function getPointsColor(points: number | null | undefined) {
-    if (points === 10) return '#22c55e'
+    if (points === 15) return '#22c55e'
     if (points === 5) return '#f5c518'
     if (points === 0) return '#f87171'
     return '#8B949E'
@@ -146,7 +146,7 @@ export default function PalpitesPage() {
             Palpites
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px' }} className="text-[#8B949E] mt-1">
-            Placar exato · 10pts &nbsp;·&nbsp; Resultado certo · 5pts &nbsp;·&nbsp; Trava quando o jogo começa
+            Placar exato · 15pts &nbsp;·&nbsp; Resultado certo · 5pts &nbsp;·&nbsp; Trava quando o jogo começa
           </p>
         </div>
 
@@ -318,7 +318,7 @@ export default function PalpitesPage() {
                       </span>
                       {pred && (
                         <div className="flex items-center gap-1.5">
-                          {pred.points === 10 && <CheckCircle size={13} style={{ color: '#22c55e' }} />}
+                          {pred.points === 15 && <CheckCircle size={13} style={{ color: '#22c55e' }} />}
                           {pred.points === 5 && <CheckCircle size={13} style={{ color: '#f5c518' }} />}
                           {pred.points === 0 && <XCircle size={13} style={{ color: '#f87171' }} />}
                           <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '14px', color: getPointsColor(pred.points) }}>

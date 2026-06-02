@@ -138,7 +138,7 @@ BEGIN
     v_points := 0;
 
     IF pred.predicted_home = v_home_score AND pred.predicted_away = v_away_score THEN
-      v_points := 10;
+      v_points := 15; -- placar exato (10) + resultado certo (5) acumulados
     ELSE
       IF pred.predicted_home > pred.predicted_away THEN v_pred_result := 'home';
       ELSIF pred.predicted_home < pred.predicted_away THEN v_pred_result := 'away';
@@ -161,7 +161,8 @@ RETURNS void AS $$
 BEGIN
   UPDATE champion_predictions
   SET points = CASE WHEN team_id = p_champion_team_id THEN 25 ELSE 0 END,
-      updated_at = NOW();
+      updated_at = NOW()
+  WHERE true;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -176,8 +177,9 @@ SELECT
   p.full_name,
   p.avatar_url,
   COALESCE(SUM(mp.points), 0) + COALESCE(MAX(cp.points), 0) AS total_points,
-  COUNT(CASE WHEN mp.points = 10 THEN 1 END) AS exact_scores,
-  COUNT(CASE WHEN mp.points >= 5 THEN 1 END) AS correct_results,
+  COUNT(CASE WHEN mp.points = 15 THEN 1 END) AS exact_scores,
+  COUNT(CASE WHEN mp.points = 5  THEN 1 END) AS correct_results,
+  CASE WHEN MAX(cp.points) = 25 THEN 1 ELSE 0 END AS champion_correct,
   COUNT(mp.id) AS total_predictions,
   RANK() OVER (
     PARTITION BY p.company_id
